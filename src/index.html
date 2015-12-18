@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html ng-app="workmanagement" ng-controller="MainController">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" type="text/css" href="styles/style.css">
+</head>
+<body>
+	<span ng-show="authData">
+	  {{ authData.password.email}} | <button class="btn btn-link" ng-click="logout()">Logout</button>
+	</span>
+	<main ng-view></main>
+	<script src="libs/app.js"></script>
+</body>
+</html>
