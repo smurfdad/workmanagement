@@ -1,4 +1,4 @@
-angular.module(APP_NAME).service("PubSub", [function(){
+angular.module(APP_NAME).service("pubSub", [function(){
 
 	var topics = {};
     var lastUid = -1;

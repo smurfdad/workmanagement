@@ -1,8 +1,8 @@
-angular.module(APP_NAME).service("AuthService",
-    ["$log", "DataConstants", "$firebaseAuth","PubSub"
-    ,function($log, DataConstants, $firebaseAuth, PubSub){
+angular.module(APP_NAME).service("authService",
+    ["$log", "dataConstants", "$firebaseAuth","pubSub"
+    ,function($log, dataConstants, $firebaseAuth, pubSub){
 		//Instaciamos el objeto para controllar firebase
-		var ref = new Firebase(DataConstants.repository);
+		var ref = new Firebase(dataConstants.repository);
 		var authObj = $firebaseAuth(ref);
 		var authData = null;
 				
@@ -14,7 +14,7 @@ angular.module(APP_NAME).service("AuthService",
 			} else {
 				console.log("Logged out");
 			}
-			PubSub.publish("authDataChanged", authData);
+			pubSub.publish("authDataChanged", authData);
 		});
 		
 		this.getAuthData = function(){
@@ -23,6 +23,7 @@ angular.module(APP_NAME).service("AuthService",
 		
 		//Funcion que realiza el login 
 		this.login = function(credentials){
+			$log.debug("Credenciales", credentials);
 			return authObj.$authWithPassword(credentials);
 		};
 		

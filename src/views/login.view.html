@@ -1,14 +1,13 @@
-<div class="alert alert-success" ng-show="success">{{ success }}</div>
-<div class="alert alert-danger" ng-show="error">{{ error }}</div>
-
-<form name="registerForm" novalidate ng-submit="login()">
-  <div class="form-group">
-    <label for="email">Email</label>
-    <input type="email" class="form-control" id="email" placeholder="Email" ng-model="model.email">
-  </div>
-  <div class="form-group">
-    <label for="password">Password</label>
-    <input type="password" class="form-control" id="password" placeholder="Password" ng-model="model.password">
-  </div>
-  <button type="submit" class="btn btn-default">Submit</button>
+<form class="navbar-form navbar-right" name="loginForm" novalidate ng-submit="login()" ng-if="!authData">
+	<div class="form-group">
+	  <input type="email" class="form-control input-sm" name="email" placeholder="Email" ng-model="model.email">
+	</div>
+	<div class="form-group">
+	  <input type="password" class="form-control input-sm" name="password" placeholder="Password" ng-model="model.password">
+	</div>
+	<button type="submit" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-log-in"></span></button>
+	<div ng-show="loginError" class="text-danger text-center">Usuario o password incorrecto</div>
 </form>
+<div class="navbar-form navbar-right" ng-show="authData">
+	<span class="form-control-static">{{ authData.password.email}}</span>  <button class="btn btn-danger btn-xs" ng-click="logout()"><span class="glyphicon glyphicon-log-out"></button>
+</div>

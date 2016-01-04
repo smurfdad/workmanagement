@@ -1,6 +1,6 @@
-angular.module(APP_NAME).controller("MainController",
-	["$log", "$scope","AuthService", "PubSub","$timeout", "$uibModal"
-	,function($log, $scope, AuthService, PubSub, $timeout, $uibModal){
+angular.module(APP_NAME).controller("mainController",
+	["$log", "$scope","authService", "pubSub","$timeout", "$uibModal"
+	,function($log, $scope, authService, pubSub, $timeout, $uibModal){
 		$log.debug("MainController");
 		$scope.title = "WorkManagement";
 		$scope.authData = null;
@@ -8,7 +8,7 @@ angular.module(APP_NAME).controller("MainController",
 		var modalRequest = 0;
 		
 		$scope.logout = function(){
-			AuthService.logout();
+			authService.logout();
 		};
 		
 		$scope.$on("loading", function(event, data){
@@ -36,6 +36,6 @@ angular.module(APP_NAME).controller("MainController",
 				$scope.authData = authData;
 			});
 		}
-		PubSub.subscribe("authDataChanged", authDataChanged);
+		pubSub.subscribe("authDataChanged", authDataChanged);
 	}]
 );

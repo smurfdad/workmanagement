@@ -1,3 +1,3 @@
-angular.module(APP_NAME).constant("DataConstants", {
-    repository: "https://lab-smurfdad.firebaseio.com/workmanagement"
+angular.module(APP_NAME).constant("dataConstants", {
+    repository: "https://lab-smurfdad.firebaseio.com/"
 });
