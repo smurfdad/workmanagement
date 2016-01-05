@@ -20663,121 +20663,204 @@ angular.module("template/typeahead/typeahead-popup.html", []).run(["$templateCac
 }]);
 !angular.$$csp() && angular.element(document).find('head').prepend('<style type="text/css">.ng-animate.item:not(.left):not(.right){-webkit-transition:0s ease-in-out left;transition:0s ease-in-out left}</style>');;var APP_NAME = "workmanagement";
 angular.module(APP_NAME, ["ngRoute", "firebase", "ui.bootstrap"]).config(
-    ["$routeProvider", function($routeProvider){
-		$routeProvider.when("/", {
-			templateUrl: "views/home.view.html",
-			requireLogin: false
-		}).when("/register", {
-			controller: "RegisterController",
-			templateUrl: "views/register.view.html",
-			requireLogin: true
-		}).otherwise({
-			templateUrl: "404.html"
-		});
+    ["$routeProvider"
+    , function($routeProvider){
+        $routeProvider.when("/", {
+            templateUrl: "views/home.view.html"
+        }).when("/register", {
+            controller: "RegisterController",
+            templateUrl: "views/register.view.html",
+            access:{
+                requireLogin: true
+            }
+        }).when("/admin", {
+            //controller: "RegisterController",
+            templateUrl: "views/admin.view.html",
+            access:{
+                requireLogin: true
+            }
+        }).when("/admin/users", {
+            controller: "usersController",
+            templateUrl: "views/users.view.html",
+            access:{
+                requireLogin: false
+            }
+        }).otherwise({
+            templateUrl: "404.html"
+        });
     }]
-).run(["$rootScope", function($rootScope){
-    $rootScope.$on("$locationChangeStart", function(event, next, current) {
-		console.log("run", next, next.requireLogin);
-		if(next.requireLogin) {
-			alert("You need to be authenticated to see this page!");
-			// Auth/session check here
-			event.preventDefault();
-		}
-    });
-}]);;angular.module(APP_NAME).constant("dataConstants", {
-    repository: "https://lab-smurfdad.firebaseio.com/"
+).run(["$rootScope", "$location", "authService", "$log"
+    , function($rootScope, $location, authService, $log){
+        $rootScope.$on('$routeChangeStart', function (event, next) {
+            var authorised;
+            if (next.access !== undefined && next.access.requireLogin) {
+                $log.debug("Authdata", next, authService.getAuthData());
+                if (authService.getAuthData() === undefined || authService.getAuthData() === null){
+                    $log.info("Pagina no autorizada");
+                    $location.url("/");
+                }
+            }
+        });
+    }]
+);;angular.module(APP_NAME).constant("dataConstants", {
+    repository: "https://lab-smurfdad.firebaseio.com/workmanagement/"
 });;angular.module(APP_NAME).controller("loginController",
-	["$log","$scope", "authService"
-	, function($log, $scope, authService){
-		$scope.model = {
-			email: "",
-			password: ""
-		};
-		$scope.loginError = false;
-		
-		$scope.login = function(){
-			$scope.$emit("loading", null);
-			$log.debug($scope.model);
-			authService.login($scope.model).then(function(authData) {
-				console.log("Logged in as:", authData.uid);
-				$scope.loginError = false;
-				$scope.$emit("loaded", null);
-			}).catch(function(error) {
-				$log.error("Authentication failed:", error);
-				$scope.loginError = true;
-				$scope.$emit("loaded", null);
-			});
-		}
-		
-	}]
+    ["$log","$scope", "authService"
+    , function($log, $scope, authService){
+        $scope.model = {
+            email: "",
+            password: ""
+        };
+        $scope.loginError = false;
+        
+        $scope.login = function(){
+            $scope.$emit("loading", null);
+            $log.debug($scope.model);
+            authService.login($scope.model).then(function(authData) {
+                console.log("Logged in as:", authData.uid);
+                $scope.loginError = false;
+                $scope.$emit("loaded", null);
+            }).catch(function(error) {
+                $log.error("Authentication failed:", error);
+                $scope.loginError = true;
+                $scope.$emit("loaded", null);
+            });
+        }
+        
+    }]
 );;angular.module(APP_NAME).controller("mainController",
-	["$log", "$scope","authService", "pubSub","$timeout", "$uibModal"
-	,function($log, $scope, authService, pubSub, $timeout, $uibModal){
-		$log.debug("MainController");
-		$scope.title = "WorkManagement";
-		$scope.authData = null;
-		var modalInstance = null;
-		var modalRequest = 0;
-		
-		$scope.logout = function(){
-			authService.logout();
-		};
-		
-		$scope.$on("loading", function(event, data){
-			$log.debug("Recibida peticion loading, activas", modalRequest);
-			modalRequest++;
-			if(modalRequest > 0){
-				modalInstance = $uibModal.open({
-					templateUrl : "views/loading.view.html",
-					size:"sm"
-				});
-			}
-		});
-		
-		$scope.$on("loaded", function(event, data){
-			$log.debug("Recibida peticion loaded, activas:", modalRequest);
-			modalRequest--;
-			if(modalRequest == 0){
-				modalInstance.close();
-			}
-		});
-		
-		var authDataChanged = function(topic, authData){
-			$log.debug("authDataChanged", authData);
-			$scope.$apply(function(){
-				$scope.authData = authData;
-			});
-		}
-		pubSub.subscribe("authDataChanged", authDataChanged);
-	}]
+    ["$log", "$scope","authService", "pubSub","$timeout", "$uibModal"
+    ,function($log, $scope, authService, pubSub, $timeout, $uibModal){
+        $log.debug("MainController");
+        $scope.title = "WorkManagement";
+        $scope.authData = null;
+        var modalInstance = null;
+        var modalRequest = 0;
+        
+        $scope.logout = function(){
+            authService.logout();
+        };
+        
+        $scope.$on("loading", function(event, data){
+            $log.debug("Recibida peticion loading, activas", modalRequest);
+            if(modalRequest == 0){
+                modalInstance = $uibModal.open({
+                    templateUrl : "views/loading.view.html",
+                    size:"sm"
+                });
+            }
+            modalRequest++;
+        });
+        
+        $scope.$on("loaded", function(event, data){
+            $log.debug("Recibida peticion loaded, activas:", modalRequest);
+            modalRequest--;
+            if(modalRequest == 0){
+                modalInstance.close();
+            }
+        });
+        
+        var authDataChanged = function(topic, authData){
+            $log.debug("authDataChanged", authData);
+            $scope.$apply(function(){
+                $scope.authData = authData;
+            });
+        }
+        pubSub.subscribe("authDataChanged", authDataChanged);
+    }]
 );;angular.module(APP_NAME).controller("RegisterController",
-	["$scope", function($scope){
-		var REPOSITORIO = "https://lab-smurfdad.firebaseio.com/workmanagement";
-		
-		$scope.model = {
-			name: "",
-			email: "",
-			password: ""
-		};
-		
-		$scope.success = null;
-		$scope.error = null;
-		
-		
-		$scope.register = function(){
-			var ref = new Firebase(REPOSITORIO);
-			ref.createUser($scope.model, function(error, userData) {
-			  if (error) {
-				console.log("Error creating user:", error);
-				$scope.error = "Error creating user: "+ error;
-			  } else {
-				console.log("Successfully created user account with uid:", userData.uid);
-				$scope.success = "Successfully created user account with uid: "+ userData.uid;
-			  }
-			});		
-		}
-		
-	}]
+    ["$scope", function($scope){
+        var REPOSITORIO = "https://lab-smurfdad.firebaseio.com/workmanagement";
+        
+        $scope.model = {
+            name: "",
+            email: "",
+            password: ""
+        };
+        
+        $scope.success = null;
+        $scope.error = null;
+        
+        
+        $scope.register = function(){
+            var ref = new Firebase(REPOSITORIO);
+            ref.createUser($scope.model, function(error, userData) {
+              if (error) {
+                console.log("Error creating user:", error);
+                $scope.error = "Error creating user: "+ error;
+              } else {
+                console.log("Successfully created user account with uid:", userData.uid);
+                $scope.success = "Successfully created user account with uid: "+ userData.uid;
+              }
+            });     
+        }
+        
+    }]
+);;angular.module(APP_NAME).controller("usersController",
+    ["$log","$scope", "usersService", "$firebaseArray"
+    , function($log, $scope, usersService, $firebaseArray){
+
+        self = this;
+        $scope.users = $firebaseArray(fireRef);;
+        $scope.user = {
+            uid: null,
+            firstname: null,
+            lastname: null,
+            username: null
+        }
+
+
+
+        this.load = function(){
+            //Cargamos la lista de usuarios
+            $scope.$emit("loading", null);
+            usersService.getUsers(function(snapshot){
+                $scope.users = {};
+                snapshot.forEach(function(elem) {
+                    $log.info("Detalle", elem.key(), elem.val());
+                    $scope.$apply(function(){
+                        var elemento = elem.val();
+                        elemento.uid = elem.key();
+
+                        $scope.users[elemento.uid]=elemento;
+                    });
+                });
+                $scope.$emit("loaded", null);
+            }, function(error){
+                $log.info("ERROR")
+                $scope.$emit("loaded", null);
+            });
+        }
+
+        self.load();
+
+        //Metodo que se invoca para la seleccion de un usuario para ediccion
+        $scope.edit = function(uid){
+            $log.debug("Seleccionado para edicion", uid);
+            $scope.user = JSON.parse(JSON.stringify($scope.users[uid]));
+        }
+
+        //Metodo que se invoca para la eliminacion de un usuario
+        $scope.delete = function(uid){
+            $log.debug("Eliminar", uid);
+            usersService.delUser(uid, function(error){
+                if (!error){
+                    self.load();
+                }
+            });
+        }
+
+        //Metodo que se invoca para persistir un usuario
+        $scope.saveUser = function(){
+            $scope.$emit("loading", null);
+            $log.debug("Guardando usuario");
+            usersService.saveUser($scope.user, function(error){
+                self.load();    
+                $scope.$emit("loaded", null);
+            });
+            
+        }
+    }]
 );;angular.module(APP_NAME).directive("loginForm", function(){
     return {
         restrict: "EA", // permite utilizar la directiva como atributo o elemento
@@ -20786,41 +20869,43 @@ angular.module(APP_NAME, ["ngRoute", "firebase", "ui.bootstrap"]).config(
 });;angular.module(APP_NAME).service("authService",
     ["$log", "dataConstants", "$firebaseAuth","pubSub"
     ,function($log, dataConstants, $firebaseAuth, pubSub){
-		//Instaciamos el objeto para controllar firebase
-		var ref = new Firebase(dataConstants.repository);
-		var authObj = $firebaseAuth(ref);
-		var authData = null;
-				
-		//Escuchamos para ver si estamos autenticados.
-		authObj.$onAuth(function(authData){
-			this.authData = authData;
-			if (authData) {
-				console.log("Logged in as:", authData);
-			} else {
-				console.log("Logged out");
-			}
-			pubSub.publish("authDataChanged", authData);
-		});
-		
-		this.getAuthData = function(){
-			return this.authData;
-		}
-		
-		//Funcion que realiza el login 
-		this.login = function(credentials){
-			$log.debug("Credenciales", credentials);
-			return authObj.$authWithPassword(credentials);
-		};
-		
-		//Funcion que registra un usuario
-		
-		this.logout = function(){
-			authObj.$unauth();
-		}
+        //Instaciamos el objeto para controllar firebase
+        var self = this;
+        var ref = new Firebase(dataConstants.repository);
+        var authObj = $firebaseAuth(ref);
+        var authData = null;
+                
+        //Escuchamos para ver si estamos autenticados.
+        authObj.$onAuth(function(authData){
+            self.authData = authData;
+            if (authData) {
+                console.log("Logged in as:", authData);
+            } else {
+                console.log("Logged out");
+            }
+            pubSub.publish("authDataChanged", authData);
+        });
+        
+        this.getAuthData = function(){
+            $log.debug(self.authData);
+            return self.authData;
+        }
+        
+        //Funcion que realiza el login 
+        this.login = function(credentials){
+            $log.debug("Credenciales", credentials);
+            return authObj.$authWithPassword(credentials);
+        };
+        
+        //Funcion que registra un usuario
+        
+        this.logout = function(){
+            authObj.$unauth();
+        }
     }]
 );;angular.module(APP_NAME).service("pubSub", [function(){
 
-	var topics = {};
+    var topics = {};
     var lastUid = -1;
     var publish = function( topic , data){
         if ( !topics.hasOwnProperty( topic ) ){
@@ -20867,7 +20952,7 @@ angular.module(APP_NAME, ["ngRoute", "firebase", "ui.bootstrap"]).config(
     **/
 
     this.subscribe = function( topic, func ){
-		// topic is not registered yet
+        // topic is not registered yet
         if ( !topics.hasOwnProperty( topic ) ){
             topics[topic] = [];
         }
@@ -20895,4 +20980,45 @@ angular.module(APP_NAME, ["ngRoute", "firebase", "ui.bootstrap"]).config(
         }
         return false;
     };
-}]);
+}]);;angular.module(APP_NAME).service("usersService",
+    ["$log", "dataConstants"
+    ,function($log, dataConstants){
+        //Instaciamos el objeto para controllar firebase
+        var self = this;
+        var ref = new Firebase(dataConstants.repository+"users/");
+
+        this.getUsers = function(onSuccess, onError){
+//            ref.once('value', function(dataSnapshot) {
+//                dataSnapshot.forEach(function(userSnap) {
+//                    $log.info("Detalle", userSnap.key(), userSnap.val());
+//                });
+//
+//            }, function(dataSnapshot) {
+//                $log.error("getUsers", dataSnapshot);
+//            });
+//            return "Hecho";
+            return ref.orderByChild("firstname").once('value', onSuccess, onError);
+        }
+
+        this.addUser = function(user){
+
+        }
+
+        this.delUser = function(uid, onComplete){
+            ref.child(uid).remove(onComplete);
+        }
+
+        this.saveUser = function(user, onComplete){
+            if (user.uid === undefined || user.uid == null || user.uid == ""){
+                ref.push(user, onComplete);
+            }else{
+                ref.child(user.uid).set(user, onComplete);
+            }
+        }
+
+        this.getRef = function(){
+            return this.ref;
+        }
+        
+    }]
+);

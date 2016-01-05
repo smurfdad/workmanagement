@@ -1,6 +1,6 @@
 angular.module(APP_NAME).service("pubSub", [function(){
 
-	var topics = {};
+    var topics = {};
     var lastUid = -1;
     var publish = function( topic , data){
         if ( !topics.hasOwnProperty( topic ) ){
@@ -47,7 +47,7 @@ angular.module(APP_NAME).service("pubSub", [function(){
     **/
 
     this.subscribe = function( topic, func ){
-		// topic is not registered yet
+        // topic is not registered yet
         if ( !topics.hasOwnProperty( topic ) ){
             topics[topic] = [];
         }

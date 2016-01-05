@@ -1,0 +1,58 @@
+<h2>Users</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <td>UID</td>
+            <td>FirstName</td>
+            <td>LastName</td>
+            <td>UserName</td>
+            <td>#</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="(key, user) in users">
+            <td>{{user.uid}}</td>
+            <td>{{user.firstname}}</td>
+            <td>{{user.lastname}}</td>
+            <td>{{user.username}}</td>
+            <td>
+                <button ng-click="edit(user.uid)" class="btn btn-warning btn-xs">
+                    <span class="glyphicon glyphicon-edit"></span>
+                </button>
+                <button ng-click="delete(user.uid)" class="btn btn-danger btn-xs">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </button>                
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<form class="form-horizontal" name="userForm" ng-submit="saveUser()" novalidate>
+    <input type="hidden" ng-model="user.uid">
+    <div class="form-group">
+        <label for="inputfirstname" class="col-sm-2 control-label">Nombre</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="inputfirstname" ng-model="user.firstname" placeholder="Nombre">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="inputlastname" class="col-sm-2 control-label">Apellidos</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="inputlastname" ng-model="user.lastname" placeholder="Apellidos">
+        </div>
+    </div>
+        
+    <div class="form-group">
+        <label for="inputusername" class="col-sm-2 control-label">Usuario</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="inputlastname" ng-model="user.username" placeholder="Usuario">
+        </div>
+    </div>
+
+    <div class="form-group text-center">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="reset" class="btn btn-danger">Limpiar</button>
+    </div>
+</form>
