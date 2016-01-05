@@ -35,7 +35,7 @@ angular.module(APP_NAME).service("usersService",
         }
 
         this.getRef = function(){
-            return this.ref;
+            return ref;
         }
         
     }]

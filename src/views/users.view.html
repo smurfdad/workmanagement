@@ -1,32 +1,37 @@
 <h2>Users</h2>
 
-<table class="table table-striped">
+ <div class="input-group" ng-show="users.length > 0">
+      <input type="text" class="form-control" id="inputfirstname" ng-model="queryFilter" placeholder="Buscar...">
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="button" ng-click="queryFilter = ''" ng-disabled="queryFilter == '' || queryFilter == null"><span class="glyphicon glyphicon-remove"></span></button>
+      </span>
+</div>
+<table class="table table-striped" ng-show="listaResultados.length>0">
     <thead>
         <tr>
-            <td>UID</td>
-            <td>FirstName</td>
-            <td>LastName</td>
-            <td>UserName</td>
-            <td>#</td>
+            <th>FirstName</th>
+            <th>LastName</th>
+            <th>UserName</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="(key, user) in users">
-            <td>{{user.uid}}</td>
+        <tr ng-repeat="user in users | filter:queryFilter as listaResultados">
             <td>{{user.firstname}}</td>
             <td>{{user.lastname}}</td>
             <td>{{user.username}}</td>
-            <td>
-                <button ng-click="edit(user.uid)" class="btn btn-warning btn-xs">
+            <td class="text-right">
+                <button ng-click="edit(user)" class="btn btn-warning btn-xs">
                     <span class="glyphicon glyphicon-edit"></span>
                 </button>
-                <button ng-click="delete(user.uid)" class="btn btn-danger btn-xs">
-                    <span class="glyphicon glyphicon-remove"></span>
+                <button ng-click="delete(user)" class="btn btn-danger btn-xs">
+                    <span class="glyphicon glyphicon-trash"></span>
                 </button>                
             </td>
         </tr>
     </tbody>
 </table>
+<div ng-show="listaResultados.length==0" class="alert alert-info">No hay resultados</div>
 
 <form class="form-horizontal" name="userForm" ng-submit="saveUser()" novalidate>
     <input type="hidden" ng-model="user.uid">
